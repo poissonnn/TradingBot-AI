@@ -1,0 +1,10 @@
+Main idea :
+Make a tools that can be used to test/train model or algorithme to buy stock or sell stock
+and see the profit
+
+
+1- Get an api to scalp stock 
+2- make a history of purchase
+3- show the profit of a purchase from the history
+4- Cool Graph
+5- make algorithme
