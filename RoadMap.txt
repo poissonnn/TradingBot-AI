@@ -8,3 +8,15 @@ and see the profit
 3- show the profit of a purchase from the history
 4- Cool Graph
 5- make algorithme
+
+
+2026-07-22 AAPL 327.8699951171875
+2026-07-23 AAPL 321.7300109863281
+2026-07-22 OKE 93.01000213623047
+2026-07-23 OKE 93.0
+
+
+
+each day but a an action an put it on the .txt
+
+and have the possibility to check the price of the action now
