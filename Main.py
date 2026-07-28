@@ -2,11 +2,11 @@
 import yfinance as yf
 import datetime
 
-now = datetime.date.today()
-print(now)
-
+import random
 import Scalp
 
+now = datetime.date.today()
+print(now)
 
 period     = "5d"
 interval   = "1d"
@@ -14,14 +14,14 @@ userPeriod = 10
 purchaseTime1 = "2026-07-22"
 purchaseTime2 = "2026-07-23"
 
-tickerData = Scalp.scan("AAPL", period, interval)
-allOpenPrice = tickerData[["Open"]].reset_index()
-print(allOpenPrice)
+#tickerData = Scalp.get_tinker_stock("AAPL", period, interval)
+#allOpenPrice = tickerData[["Open"]].reset_index()
+#print(allOpenPrice)
 
-def purchaseStock(time,ticker):
+def purchase_stock(time,ticker):
     #print("purchase")
 
-    tickerData = Scalp.scan(ticker, period, interval)
+    tickerData = Scalp.get_tinker_stock(ticker, period, interval)
     #allOpenPrice = tickerData[["Open"]].reset_index()
     #print(allOpenPrice)
     openPrice = tickerData.loc[time,"Open"]
@@ -31,6 +31,9 @@ def purchaseStock(time,ticker):
     with open("purchaseHistory.txt", "a") as purchaseHistory:
         purchaseHistory.write(f"{time} {ticker} {openPrice}\n")
 
+#purchase_stock(purchaseTime1,"OKE")
 
-purchaseStock(purchaseTime1,"AAPL")
-purchaseStock(purchaseTime2,"AAPL")
+with open("purchaseHistory.txt") as purchaseHistory:
+    lines = purchaseHistory.readlines()
+
+print(lines)

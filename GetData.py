@@ -5,17 +5,6 @@ import requests
 import pandas as pd
 from io import StringIO
 
-def get_tinker_stock(entreprise, period, interval):
-
-    #print("hi from scalp")
-
-    ticker = yf.Ticker(entreprise)
-    info = ticker.history(period=period, interval=interval)
-    #print(info)
-
-    return info
-
-
 #import Scalp
 
 def get_500_tickers():
@@ -41,3 +30,6 @@ def get_500_tickers():
         print(f"error : {error}")
         return [] # return an empty list to no break anything
 
+
+
+allTickers = get_500_tickers()
