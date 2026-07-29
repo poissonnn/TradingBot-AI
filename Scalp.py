@@ -1,11 +1,18 @@
 import yfinance as yf
 from datetime import datetime, timedelta
 
+from collections import defaultdict
+
 import requests
 import pandas as pd
 from io import StringIO
 
-def get_tinker_stock(entreprise, period, interval):
+period     = "max"
+interval   = "1d"
+
+
+#get all the information about a ticker
+def get_ticker_stock(entreprise, period, interval):
 
     #print("hi from scalp")
 
@@ -14,7 +21,6 @@ def get_tinker_stock(entreprise, period, interval):
     #print(info)
 
     return info
-
 
 #import Scalp
 
@@ -41,3 +47,56 @@ def get_500_tickers():
         print(f"error : {error}")
         return [] # return an empty list to no break anything
 
+def get_purchase_history():
+
+    all_purchase = defaultdict(list)
+
+    with open("purchaseHistory.txt") as purchaseHistory:
+        lines = purchaseHistory.readlines()
+
+    fileLength = len(lines)
+
+    for i in range(fileLength):
+        #take the line
+        stockPurchase = lines[i].strip()
+        stockPurchase = stockPurchase.split() # split each element separated by a space
+
+        #print(stockPurchase)
+        ticker = stockPurchase[1]
+        ticker = ticker.strip()
+    
+        date = stockPurchase[0]
+        date = date.strip()
+
+        all_purchase[ticker].append(date)
+
+    all_purchase = dict(all_purchase)
+
+    return all_purchase
+
+def get_stock_price(time,ticker,atOpeningMarket = True):
+    tickerData = get_ticker_stock(ticker, period, interval)
+
+    if atOpeningMarket:
+        price = tickerData.loc[str(time),"Open"]
+    else:
+        price = tickerData.loc[str(time), "Close"]
+    return price
+
+def get_last_available_price(ticker, closingPrice = True):
+    tickerData = get_ticker_stock(ticker,period,interval)
+
+    if closingPrice:
+        price = tickerData["Close"].iloc[-1]
+
+        if pd.isna(price):
+            price = tickerData["Close"].iloc[-2]
+    else:
+        price = tickerData["Open"].iloc[-1]
+
+        if pd.isna(price):
+            price = tickerData["Open"].iloc[-2]
+
+    return price
+
+    
