@@ -6,17 +6,22 @@ from collections import defaultdict
 import requests
 import pandas as pd
 from io import StringIO
+import pytz # pour être sur la bourse américaine
+
+new_york_now = datetime.now(pytz.timezone("America/New_York")).hour
+print(f"New york hours : {new_york_now}")
+
 
 period     = "max"
 interval   = "1d"
 
 
 #get all the information about a ticker
-def get_ticker_stock(entreprise, period, interval):
+def get_ticker_stock(ticker):
 
     #print("hi from scalp")
 
-    ticker = yf.Ticker(entreprise)
+    ticker = yf.Ticker(ticker)
     info = ticker.history(period=period, interval=interval)
     #print(info)
 
@@ -74,8 +79,9 @@ def get_purchase_history():
 
     return all_purchase
 
-def get_stock_price(time,ticker,atOpeningMarket = True):
-    tickerData = get_ticker_stock(ticker, period, interval)
+def get_stock_price(time, tickerData, atOpeningMarket = True ):
+    
+    #tickerData = get_ticker_stock(ticker,period,interval)
 
     if atOpeningMarket:
         price = tickerData.loc[str(time),"Open"]
@@ -83,20 +89,29 @@ def get_stock_price(time,ticker,atOpeningMarket = True):
         price = tickerData.loc[str(time), "Close"]
     return price
 
-def get_last_available_price(ticker, closingPrice = True):
-    tickerData = get_ticker_stock(ticker,period,interval)
-
-    if closingPrice:
-        price = tickerData["Close"].iloc[-1]
-
-        if pd.isna(price):
-            price = tickerData["Close"].iloc[-2]
+def get_last_available_price(tickerData, closingPrice = True ):
+    if new_york_now < 16:
+        price = tickerData["Close"].iloc[-2]
+        print(f"price before closure yesterday : {price}")
     else:
-        price = tickerData["Open"].iloc[-1]
+        price =tickerData["Close"].iloc[-1]
+        print(f"price before closure today : {price}")
+
+
+
+    #tickerData = get_ticker_stock(ticker,period,interval)    
+    """
+    if closingPrice:
+        price = tickerData["Close"].iloc[-2]
 
         if pd.isna(price):
-            price = tickerData["Open"].iloc[-2]
+            price = tickerData["Close"].iloc[-3]
+    else:
+        price = tickerData["Open"].iloc[-2]
 
+        if pd.isna(price):
+            price = tickerData["Open"].iloc[-3]
+    """
     return price
 
     

@@ -3,20 +3,19 @@ Make a tools that can be used to test/train model or algorithme to buy stock or 
 and see the profit
 
 
-1- Get an api to scalp stock X
-2- make a history of purchase X
-3- show the profit of a purchase from the history
+1- Get an api to scalp stock - X
+2- make a history of purchase - X
+3- show the profit of a purchase from the history - X
+3.5- make frontend
 4- Cool Graph
 5- make algorithme
 
 
-2026-07-22 AAPL 327.8699951171875
-2026-07-23 AAPL 321.7300109863281
-2026-07-22 OKE 93.01000213623047
-2026-07-23 OKE 93.0
+streamlit run Interface.py
 
 
 
-each day but a an action an put it on the .txt
-
-and have the possibility to check the price of the action now
+Interface
+1- be able to change te date | and easily move through time
+2- be able to purchase stock from that date from a specific or random ticker
+3- be able to see the history of purchase and the benefits

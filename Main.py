@@ -8,7 +8,7 @@ import Scalp
 now = datetime.today()
 print(now)
 yesterday = (now - timedelta(days=1)).date() # le .date() permet de garder que l'année mois et jour
-print(yesterday)
+
 
 period     = "1mo"
 interval   = "1d"
@@ -17,11 +17,14 @@ purchaseTime1 = "2026-07-20"
 purchaseTime2 = "2026-07-22"
 purchaseTime3 = "2026-07-27"
 
-"""tickerData = Scalp.get_tinker_stock("AAPL", period, interval)
+"""
+tickerData = Scalp.get_ticker_stock("AAPL")
 allOpenPrice = tickerData[["Open"]].reset_index()
 print(allOpenPrice)
 allOpenPrice = tickerData[["Close"]].reset_index()
-print(allOpenPrice)"""
+print(allOpenPrice)
+"""
+
 
 
 def purchase_open_stock(time,ticker):
@@ -40,8 +43,10 @@ def purchase_open_stock(time,ticker):
         
 def compare_2_last_price(time1, ticker):
     try:
-        price1 = Scalp.get_stock_price(time1, ticker)
-        last_price = Scalp.get_last_available_price(ticker)
+        tickerData = Scalp.get_ticker_stock(ticker)
+
+        price1 = Scalp.get_stock_price(time1, tickerData)
+        last_price = Scalp.get_last_available_price(tickerData)
 
     except Exception as error :
         print(f"erreur : {error}")
@@ -49,27 +54,28 @@ def compare_2_last_price(time1, ticker):
         #exit()
         
     
-    #print(price1)
-    #print(last_price)
+    print(price1)
+    print(last_price)
 
     difference = last_price - price1
-    #print(difference)
     return difference
 
 
+def check_all_purchase_history():
+    all_purchase_history = Scalp.get_purchase_history()
+    size_of_all_purchase_history = len(all_purchase_history)
 
-all_purchase_history = Scalp.get_purchase_history()
-size_of_all_purchase_history = len(all_purchase_history)
+    money = 0
 
-money = 0
+    for keys in all_purchase_history:
+        #print(keys)
+        values = all_purchase_history[keys]
+        #print(values)
+        for items in values:
+            #print(items)
 
-for keys in all_purchase_history:
-    print(keys)
-    values = all_purchase_history[keys]
-    print(values)
-    for items in values:
-        #print(items)
+            money = money + compare_2_last_price(items,keys)
 
-        money = money + compare_2_last_price(items,keys)
+    print(money)
 
-print(money)
+check_all_purchase_history()
