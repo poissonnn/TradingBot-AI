@@ -10,7 +10,7 @@ print(now)
 yesterday = (now - timedelta(days=1)).date() # le .date() permet de garder que l'année mois et jour
 
 
-period     = "1mo"
+period     = "max"
 interval   = "1d"
 
 purchaseTime1 = "2026-07-20"
@@ -78,4 +78,4 @@ def check_all_purchase_history():
 
     print(money)
 
-check_all_purchase_history()
+

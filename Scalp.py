@@ -12,12 +12,8 @@ new_york_now = datetime.now(pytz.timezone("America/New_York")).hour
 print(f"New york hours : {new_york_now}")
 
 
-period     = "max"
-interval   = "1d"
-
-
 #get all the information about a ticker
-def get_ticker_stock(ticker):
+def get_ticker_stock(ticker, period = "max", interval = "1d"):
 
     #print("hi from scalp")
 
@@ -82,12 +78,24 @@ def get_purchase_history():
 def get_stock_price(time, tickerData, atOpeningMarket = True ):
     
     #tickerData = get_ticker_stock(ticker,period,interval)
+    #date = pd.Timestamp(time)
 
-    if atOpeningMarket:
-        price = tickerData.loc[str(time),"Open"]
-    else:
-        price = tickerData.loc[str(time), "Close"]
+    
+    """if date not in tickerData.index:
+        return None"""
+    print(time)
+    try:
+        if atOpeningMarket:
+            price = tickerData.loc[str(time),"Open"]
+
+        else:
+            price = tickerData.loc[str(time), "Close"]
+    except:
+        print("non")
+        return None
+    
     return price
+    
 
 def get_last_available_price(tickerData, closingPrice = True ):
     if new_york_now < 16:
