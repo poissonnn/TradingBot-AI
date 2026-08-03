@@ -37,7 +37,7 @@ mettre info du bot :
 2 ----------
 graph principal : 
 simple plot additionnant le capital de départ - l'achat + prix actuelle
-(je repasse en anglais c'est mieux pour mon anglais)
+(je repasse en anglais c'est mieux pour entraîner mon anglais)
 data like the : current budget ; the gain or the loss from the start budget
 
 

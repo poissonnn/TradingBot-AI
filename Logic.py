@@ -40,6 +40,7 @@ def purchase_open_stock(time,ticker):
     with open("purchaseHistory.txt", "a") as purchaseHistory:
         # openPrice is for debug because the price will be check by Scalp.get_stock_price()
         purchaseHistory.write(f"{time} {ticker} {openPrice}\n") 
+        return openPrice
         
 def compare_2_last_price(time1, ticker):
     try:

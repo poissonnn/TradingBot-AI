@@ -59,6 +59,20 @@ white       = [1, 1, 1]
 
 #-----------------------------------------------
 #PERSITANT DATA
+if "start_date" not in st.session_state:
+    st.session_state.start_date = now
+
+if "end_date" not in st.session_state:
+    st.session_state.end_date = now
+
+if "initial_budget" not in st.session_state:
+    st.session_state.initial_budget = 10
+
+# other variale
+
+#make sure sidebar info are true and fill
+min_simulation_periode = 10
+min_initial_budget = 50
 
 #-----------------------------------------------
 #SIDEBAR -> simulation input :
@@ -66,24 +80,24 @@ white       = [1, 1, 1]
 
 with st.sidebar:
     st.header("Simulation data and input")
-    start_date = st.date_input("Starting date")
+    st.session_state.start_date = st.date_input("Starting date")
     end_date = st.date_input("Ending date")
 
-    initial_budget = st.number_input("Choose initial budget")
+    st.session_state.initial_budget = st.number_input("Choose initial budget")
 
 
-    start_date_str = str(start_date).replace("-", " ")  
+    start_date_str = str(st.session_state.start_date).replace("-", " ")  
     st.header(f"Start at : {start_date_str}")
 
     end_date_str = str(end_date).replace("-", " ")
     st.header(f"End at : {end_date_str}")   
 
-    simulation_periode = end_date-start_date
+    simulation_periode = end_date-st.session_state.start_date
     st.header(f"Simulation periode : {(simulation_periode).days} days")
 
-    st.header(f"With an initial budget of {initial_budget} $")
+    st.header(f"With an initial budget of {st.session_state.initial_budget} $")
 
-    print(start_date)
+    print(st.session_state.start_date)
     print(end_date)
 
     
@@ -97,16 +111,64 @@ with st.sidebar:
 
     start_simulation = st.button("Start the Simulation")
 
-    min_simulation_periode = 10
-    min_initial_budget = 50
+    # make sure that every setting is fill
+    if start_simulation:
 
-    if simulation_periode < min_simulation_periode:
-        st.warning(f"Simulation periode need to be more than {min_simulation_periode} days")
+        if simulation_periode.days < min_simulation_periode:
+            st.warning(f"Simulation periode need to be more than {min_simulation_periode} days")
 
-    elif initial_budget < min_initial_budget:
-        st.warning(f"Initial budget need to be over {min_initial_budget} $")
+        elif st.session_state.initial_budget < min_initial_budget:
+            st.warning(f"Initial budget need to be over {min_initial_budget} $")
 
-    elif start_simulation :
-        st.success(f"Simulation started")
+        else :
+            st.success(f"Simulation started")
+
+
+
+#-----------------------------------------------
+# LOG all the purchase
+
+
+purchase = st.button('purchase stock')
+st.session_state.date = "2026-06-25"
+ticker_choice = "AAPL"
+
+
+if purchase and ticker_choice:
+    print(f"purchase {ticker_choice}")
+    print(st.session_state.date)
+    price = Logic.purchase_open_stock(str(st.session_state.date), ticker_choice)
+    st.success(f"purchase stock from {ticker_choice} at {round(price,3)} $")
+
+st.header("Log of all transaction")
+
+
+purchase_history = Scalp.get_purchase_history(True)
+
+rows = []
+
+for keys in purchase_history:
+    
+    values = purchase_history[keys]
+
+    for items in values:
+
+        items  = items.split()
+        
+        
+        date   = str(items[0]).replace("-", " ")
+        ticker = items[1]
+        price  = float(items[2])
+        
+        rows.append({
+            "Ticker": ticker,
+            "Date": date,
+            "Price (in usd)": price,
+        })
+
+
+#df = pd.DataFrame(columns=["Ticker", "Date", "Price (in usd)"])
+df = pd.DataFrame(rows)
+table = st.dataframe(df)
 
 

@@ -48,7 +48,7 @@ def get_500_tickers():
         print(f"error : {error}")
         return [] # return an empty list to no break anything
 
-def get_purchase_history():
+def get_purchase_history(return_with_price = False):
 
     all_purchase = defaultdict(list)
 
@@ -56,6 +56,18 @@ def get_purchase_history():
         lines = purchaseHistory.readlines()
 
     fileLength = len(lines)
+
+    # for interface i need the price but i add this condition
+    # to not break other part of the code that use that fonction
+    if return_with_price:
+        for i in range(fileLength):
+            stockPurchase = lines[i].strip()        
+
+            all_purchase[i].append(stockPurchase)
+    
+        all_purchase = dict(all_purchase)
+
+        return all_purchase
 
     for i in range(fileLength):
         #take the line
@@ -66,12 +78,15 @@ def get_purchase_history():
         ticker = stockPurchase[1]
         ticker = ticker.strip()
     
+        
         date = stockPurchase[0]
         date = date.strip()
 
         all_purchase[ticker].append(date)
+        
 
     all_purchase = dict(all_purchase)
+
 
     return all_purchase
 
