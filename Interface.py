@@ -82,13 +82,14 @@ if "time_sleep" not in st.session_state:
 
 
 #-----------------------------------------------
+#SIDEBAR
 
 with st.sidebar:
     st.session_state.date = st.date_input('Date')
     #print(st.session_state.date)
     #print(st.session_state.old_date)
 
-
+    #make sure that changing date is not affected by : add_day
     if st.session_state and st.session_state.date != st.session_state.old_date:
         st.session_state.increment_clock = 0
         st.session_state.old_date = st.session_state.date
@@ -97,7 +98,7 @@ with st.sidebar:
         #print(st.session_state.old_date)
         
 
-    #pause_time = st.toggle("let day pass")
+    #increment a day
     add_day = st.button("add day")
     if add_day:
         st.session_state.increment_clock = st.session_state.increment_clock + 1
@@ -116,26 +117,32 @@ with st.sidebar:
         2.0,
         5.0,]
     )
-
+    # show current day
     header_date = st.session_state.date = st.session_state.date + timedelta(days=st.session_state.increment_clock)
     header_date = str(header_date)
     header_date = header_date.replace("-", " ")
 
     st.header(f"Date : {header_date}")
 
-
+    # at the end to ensure that any prior input is taken in account before the rerun
     if st.session_state.rewind_time:
         st.session_state.increment_clock = st.session_state.increment_clock + 1
         print(st.session_state.increment_clock)
         time.sleep(st.session_state.time_sleep)
+
         st.rerun()
 
+    show_graph = st.toggle("Show Graph")
+#-----------------------------------------------
+# ALGO INPUT
 
 
 
 
-    #if pause_time:
-    #    st.session_state.date = st.session_state.date + timedelta(days=1)
+
+#-----------------------------------------------
+# GRAPH
+if show_graph:
 
     ticker_choice = st.text_input("Choose a ticker")
 
@@ -154,85 +161,87 @@ with st.sidebar:
             "max",
         ],
         )
+            
+    if st.session_state.date and ticker_choice:
+        
+        tickerData = Scalp.get_ticker_stock(ticker_choice, periode_slider)
+        #print(tickerData)
+        print(st.session_state.date.strftime("%A"))
+        
+        #in week
+        if st.session_state.date.strftime("%A") not in ("Saturday", "Sunday"):
+            price = Scalp.get_stock_price(st.session_state.date, tickerData)
 
-if st.session_state.date and ticker_choice:
-    
-    tickerData = Scalp.get_ticker_stock(ticker_choice, periode_slider)
-    #print(tickerData)
-    print(st.session_state.date.strftime("%A"))
-    
-    #in week
-    if st.session_state.date.strftime("%A") not in ("Saturday", "Sunday"):
-        price = Scalp.get_stock_price(st.session_state.date, tickerData)
+            #unexpected closure
+            if price == None :
+                print("Market close that day")
+                st.subheader(f"Last {ticker_choice} price of a stock {round(st.session_state.last_price,3)}")
+                st.caption("Market close")
 
-        #unexpected closure
-        if price == None :
-            print("Market close that day")
-            st.subheader(f"Last {ticker_choice} price of a stock {round(st.session_state.last_price,3)}")
-            st.caption("Market close")
+            else:
+                st.subheader(f"{ticker_choice} price of a stock {round(price,3)}")
+                st.session_state.last_price = price
 
+        # in weekend
         else:
-            st.subheader(f"{ticker_choice} price of a stock {round(price,3)}")
-            st.session_state.last_price = price
-
-    # in weekend
-    else:
-        print("Market close for weekend")
-        st.subheader(f"Last {ticker_choice} price of a stock {round(st.session_state.last_price,3)}")
-        st.subheader("Market close for weekend")
+            print("Market close for weekend")
+            st.subheader(f"Last {ticker_choice} price of a stock {round(st.session_state.last_price,3)}")
+            st.subheader("Market close for weekend")
 
 
-    tickerDataGraph = tickerData["Close"]
-    
-    #print(tickerDataGraph)
+        tickerDataGraph = tickerData["Close"]
+        
+        #print(tickerDataGraph)
 
-    with _lock:
-        ticker_data_graph_close = tickerData["Close"]
-        ticker_data_graph_mean  = tickerData["Close"].mean()
+        with _lock:
+            ticker_data_graph_close = tickerData["Close"]
+            ticker_data_graph_mean  = tickerData["Close"].mean()
 
-        fig, axs = plt.subplots()
-        axs.plot(tickerDataGraph,
-                color     = green_light,
-                linewidth = PRICE_WIDTH,
-                zorder    = Z_PRICE,
-                label     = ticker_choice )
+            fig, axs = plt.subplots()
+            axs.plot(tickerDataGraph,
+                    color     = green_light,
+                    linewidth = PRICE_WIDTH,
+                    zorder    = Z_PRICE,
+                    label     = ticker_choice )
 
-        axs.axhline(ticker_data_graph_mean,
-                linewidth = MEAN_WIDTH ,
-                linestyle = (0,(2,2.5)),   
-                alpha     = 0.5,
-                label     = f"{ticker_choice} Mean",
-                color     = green_dark,
-                zorder    = Z_MEAN,)
-
-
-        #axs.axvline(st.session_state.date,
-        #        linewidth = MEAN_WIDTH ,
-        #        linestyle = (0,(5,5)),   
-        #        alpha     = 1,
-        #        label     = f"{ticker_choice} Choose date",
-        #        color     = teal_dark,
-        #        zorder    = Z_MEAN,)
-
-        axs.grid(True,
-                which     = "major",
-                alpha     = 0.25 ,
-                linestyle = "--",
-                linewidth = GRID_WIDTH,
-                color     = gray,
-                zorder    = Z_GRID)
-
-        axs.legend(
-                loc       = "upper left",
-                frameon   = False,
-                fontsize  = 9,
-                labelcolor = black,
-                )   
-        plt.tight_layout()
-        st.pyplot(fig)
+            axs.axhline(ticker_data_graph_mean,
+                    linewidth = MEAN_WIDTH ,
+                    linestyle = (0,(2,2.5)),   
+                    alpha     = 0.5,
+                    label     = f"{ticker_choice} Mean",
+                    color     = green_dark,
+                    zorder    = Z_MEAN,)
 
 
-purchase = st.button('purchase stock')
+            #axs.axvline(st.session_state.date,
+            #        linewidth = MEAN_WIDTH ,
+            #        linestyle = (0,(5,5)),   
+            #        alpha     = 1,
+            #        label     = f"{ticker_choice} Choose date",
+            #        color     = teal_dark,
+            #        zorder    = Z_MEAN,)
+
+            axs.grid(True,
+                    which     = "major",
+                    alpha     = 0.25 ,
+                    linestyle = "--",
+                    linewidth = GRID_WIDTH,
+                    color     = gray,
+                    zorder    = Z_GRID)
+
+            axs.legend(
+                    loc       = "upper left",
+                    frameon   = False,
+                    fontsize  = 9,
+                    labelcolor = black,
+                    )   
+            plt.tight_layout()
+            st.pyplot(fig)
+
+
+#purchase = st.button('purchase stock')
+
+purchase = None
 
 if purchase:
     if not ticker_choice:

@@ -1,4 +1,4 @@
-#3.12.10
+#3.12.10    
 import yfinance as yf
 from datetime import timedelta, datetime
 
@@ -77,5 +77,4 @@ def check_all_purchase_history():
             money = money + compare_2_last_price(items,keys)
 
     print(money)
-
 
