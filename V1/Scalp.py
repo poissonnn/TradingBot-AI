@@ -24,7 +24,6 @@ def get_ticker_stock(ticker, period = "max", interval = "1d"):
     return info
 
 #import Scalp
-
 def get_500_tickers():
     url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
     print(url)

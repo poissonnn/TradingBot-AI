@@ -61,7 +61,6 @@ def compare_2_last_price(time1, ticker):
     difference = last_price - price1
     return difference
 
-
 def check_all_purchase_history():
     all_purchase_history = Scalp.get_purchase_history()
     size_of_all_purchase_history = len(all_purchase_history)

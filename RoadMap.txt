@@ -50,7 +50,11 @@ just ploting from the start of the run and with a axhline of each purchase
 a log of all purchase
 tiker | time | price
 
+5 ----------
+Remake the interface again
 
+the projet should divide in an other way one file that make all the logic like the date, budget and other calculation; one file make all the api request and 
+the action like purchase, finaly one that manage the interface but that get minimun data
 
 
 
