@@ -136,4 +136,3 @@ def get_last_available_price(tickerData, closingPrice = True ):
     """
     return price
 
-    

@@ -66,3 +66,18 @@ the action like purchase, finaly one that manage the interface but that get mini
 2026-07-22 VLO 319.25
 2026-07-27 OKE 90.86000061035156
 2026-07-27 AAPL 334.5400085449219
+
+
+New meta
+SO : 
+Request.py    : like what he is already doing just get some data like the stock the purchase history;;
+
+Simulation.py : should hold all the data like starting and ending date; inital and current capital.....
+
+Algorithme.py : decide what to do and act like scratch with a lot of if fucntion
+
+
+data frame
+
+ticker | date       | price | current    | price  | variation
+AAPL   | 2025 07 11 | 96.51 | 2026 08 11 | 164.78 | +70%

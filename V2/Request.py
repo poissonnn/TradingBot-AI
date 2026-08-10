@@ -11,12 +11,16 @@ import pytz # pour être sur la bourse américaine
 
 
 now = datetime.today()
-print(now)
+#print(now)
 yesterday = (now - timedelta(days=1)).date() # le .date() permet de garder que l'année mois et jour
 
 # make the code able to know if the bourse is open or close
 new_york_now = datetime.now(pytz.timezone("America/New_York")).hour
-print(f"New york hours : {new_york_now}")
+#print(f"New york hours : {new_york_now}")
+
+# aware and naive timezone
+tz = pytz.timezone("America/New_York")
+utc = pytz.UTC
 
 # if the value for get_ticker_stock the period is "max" and the interval is "1d"
 period     = "max"
@@ -35,6 +39,8 @@ def get_ticker_stock(ticker, period = "max", interval = "1d"):
 
     ticker_all_data = yf.Ticker(ticker)
     ticker_transaction = ticker_all_data.history(period=period, interval=interval)
+
+    ticker_transaction = ticker_transaction.tz_localize(None)
     #print(info)
     tickerData = {
         "ticker":ticker,
@@ -43,7 +49,7 @@ def get_ticker_stock(ticker, period = "max", interval = "1d"):
 
     return tickerData
 
-def get_purchase_history():
+def get_purchase_history(return_with_price=False):
 
     all_purchase = defaultdict(list)
 
@@ -51,6 +57,18 @@ def get_purchase_history():
         lines = purchaseHistory.readlines()
 
     fileLength = len(lines)
+
+    if return_with_price:
+        for i in range(fileLength):
+            stockPurchase = lines[i].strip()        
+
+            all_purchase[i].append(stockPurchase)
+    
+        all_purchase = dict(all_purchase)
+
+        return all_purchase
+
+
     for i in range(fileLength):
 
         #take the line
@@ -75,13 +93,6 @@ def get_purchase_history():
 
 def get_stock_price(time, tickerData, atOpeningMarket = True ):
     
-    #tickerData = get_ticker_stock(ticker,period,interval)
-    #date = pd.Timestamp(time)
-
-    
-    """if date not in tickerData.index:
-        return None"""
-    print(time)
     try:
         if atOpeningMarket:
             price = tickerData["data"].loc[str(time),"Open"]
@@ -89,7 +100,7 @@ def get_stock_price(time, tickerData, atOpeningMarket = True ):
         else:
             price = tickerData["data"].loc[str(time), "Close"]
     except:
-        print("non")
+        print("error in get_stock_price()")
         return None
     
     return price
@@ -106,8 +117,12 @@ def get_last_available_price(tickerData, closingPrice = True ):
 
 def purchase_open_stock(time,tickerData):
     #print(allOpenPrice)
+    time = pd.Timestamp(time)
+
     openPrice = tickerData["data"].loc[time,"Open"]
     ticker_name = tickerData["ticker"]
+
+    time = time.date()
 
     print(f"{time} - Purchase from {ticker_name} at {openPrice} $")
 
@@ -116,7 +131,41 @@ def purchase_open_stock(time,tickerData):
         purchaseHistory.write(f"{time} {ticker_name} {openPrice}\n") 
         return openPrice
 
-tickerData = get_ticker_stock("AAPL","5d","1d")
-print(tickerData["ticker"])
-print(tickerData["data"])
+def purchase_history_to_dataframe():
+    print("I belive")
 
+def compare_with_last_price(tickerData, time):
+    last_price = get_last_available_price(tickerData)
+    price = get_stock_price(time, tickerData)
+
+    return last_price - price
+
+def build_data_frame():
+    columns = ["Ticker", "Date", "Date Price", "Current Price", "Variation"]
+
+    ticker        = []
+    date          = []
+    price         = []
+    current_price = []
+    variation     = []
+
+    all_purchase = get_purchase_history(True)
+
+    for keys in all_purchase:
+        print(keys)
+        for values in all_purchase[keys]:
+            print(values)
+
+            values = values.split()
+
+
+            date.append(values[0])
+            ticker.append(values[1])
+            price.append(values[2])
+
+
+
+
+    #print(DataFrame)
+
+build_data_frame()
