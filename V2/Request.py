@@ -99,8 +99,9 @@ def get_stock_price(time, tickerData, atOpeningMarket = True ):
 
         else:
             price = tickerData["data"].loc[str(time), "Close"]
-    except:
-        print("error in get_stock_price()")
+            
+    except Exception as error:
+        print(f"{error} in get_stock_price()")
         return None
     
     return price
@@ -124,48 +125,146 @@ def purchase_open_stock(time,tickerData):
 
     time = time.date()
 
-    print(f"{time} - Purchase from {ticker_name} at {openPrice} $")
+    #print(f"{time} - Purchase from {ticker_name} at {openPrice} $")
 
     with open("purchaseHistory.txt", "a") as purchaseHistory:
         # openPrice is for debug because the price will be check by Scalp.get_stock_price()
         purchaseHistory.write(f"{time} {ticker_name} {openPrice}\n") 
         return openPrice
 
-def purchase_history_to_dataframe():
+def compare_with_other_date(tickerData,stock_price ,date_to_compare):
+
+
+    history_price = get_stock_price(date_to_compare,tickerData)
+
+    while history_price == None:
+        date_to_compare = date_to_compare - timedelta(days=1)
+        history_price = get_stock_price(date_to_compare,tickerData)
+        print("tkt si erreur")
+
+    difference  = history_price - stock_price
+    variation  = (history_price * 100) / stock_price-100
+
+    return difference, variation, history_price
+
+def compare_with_last_price(tickerData, stock_price):
+    history_price = get_last_available_price(tickerData)
+
+    difference  = history_price - stock_price
+    variation  = (history_price * 100) / stock_price-100
+
+    return difference, variation, history_price
+
+def build_data_frame(Time_to_compare_to = True):
     print("I belive")
 
-def compare_with_last_price(tickerData, time):
-    last_price = get_last_available_price(tickerData)
-    price = get_stock_price(time, tickerData)
-
-    return last_price - price
-
-def build_data_frame():
-    columns = ["Ticker", "Date", "Date Price", "Current Price", "Variation"]
-
-    ticker        = []
-    date          = []
-    price         = []
-    current_price = []
-    variation     = []
+    all_ticker              = []
+    all_date                = []
+    all_stock_price         = []
+    all_current_stock_price = []
+    all_difference          = []
+    all_variation           = []
 
     all_purchase = get_purchase_history(True)
 
     for keys in all_purchase:
-        print(keys)
         for values in all_purchase[keys]:
-            print(values)
-
+            # take the data from purchasehistory
             values = values.split()
+            # 1 - Date
+            all_date.append(values[0])
+
+            #2 - Ticker
+            ticker = values[1]
+            all_ticker.append(ticker)
+
+            #3 - Price at purchase
+            history_stock_price = round(float(values[2]),2)
+            all_stock_price.append(history_stock_price)
+
+            #4-5-6
+            #Difference between history and current price; the % and the current price
+            #from the data of purchaseHistory i get other info
+            tickerData = get_ticker_stock(ticker)
+
+            if Time_to_compare_to == True:
+                difference, variation, current_stock_price = compare_with_last_price(tickerData, history_stock_price)
+            else:
+                difference, variation, current_stock_price = compare_with_other_date(tickerData, history_stock_price,Time_to_compare_to)
+
+            all_current_stock_price.append(round(current_stock_price, 2))
+            all_difference.append(round(difference, 2))
+            all_variation.append(round(variation, 2))
+
+    if Time_to_compare_to == True:
+        columns = ["Ticker", "Date", "Price", f"Price from {now.date()}", "Difference", "Variation"]
+    else:
+        columns = ["Ticker", "Date", "Price", f"Price from {Time_to_compare_to}", "Difference", "Variation"]
+
+    DataFrame = pd.DataFrame(list(zip(all_ticker, all_date, all_stock_price, all_current_stock_price, all_difference, all_variation)),
+                    columns = columns )
+
+    return DataFrame
+
+def calculate_other_data(dataFrame):
+    print(dataFrame)
+
+    round_number = 3
+
+    sum_stock_price         = round(dataFrame["Price"].sum(), round_number)
+    sum_current_stock_price = round(dataFrame[dataFrame.columns[3]].sum(), round_number)
+    sum_stock_difference    = round(sum_current_stock_price - sum_stock_price, round_number)
+    # (VA - VD / VD )* 100
+    variation = round((((sum_current_stock_price - sum_stock_price )/ sum_stock_price) * 100), round_number)
 
 
-            date.append(values[0])
-            ticker.append(values[1])
-            price.append(values[2])
+    """
+    # C'est une oeuvre d'art mais c'est aussi inutile
+    # Work of art but useless
+
+    columns = [ "Price", dataFrame.columns[3], "Difference", "Variation"]
+    columns_data = [sum_stock_price, sum_current_stock_price, sum_stock_difference, sum_stock_variation]
+
+    print(columns_data[1])
+    columns_data[1] = columns_data[1] +1 
+    print(columns_data[1])
+
+    for i in range(len(columns)):
+        print(columns[i])
+
+        for value in dataFrame[columns[i]]:
+            columns_data[i] = columns_data[i] + value
+        
+        print(columns_data[i]) 
+    """
 
 
 
+    return sum_stock_price, sum_current_stock_price, sum_stock_difference, variation
 
-    #print(DataFrame)
 
-build_data_frame()
+df_debug = pd.DataFrame([
+    ["TPR",  "2025-01-02", 64.22, 68.68, 4.46, 6.95],
+    ["FITB", "2025-01-03", 40.24, 41.37, 1.13, 2.80],
+    ["GNRC", "2025-01-06", 160.98, 161.86, 0.88, 0.55],
+    ["GOOG", "2025-01-07", 197.24, 197.02, -0.22, -0.11],
+    ["CRH",  "2025-01-08", 90.64, 95.93, 5.29, 5.84],
+    ["IQV",  "2025-01-10", 202.71, 198.42, -4.29, -2.12],
+    ["VZ",   "2025-01-13", 34.40, 34.83, 0.43, 1.25],
+    ["RCL",  "2025-01-14", 224.37, 230.20, 5.83, 2.60],
+    ["SYK",  "2025-01-15", 359.26, 379.43, 20.17, 5.61],
+    ["DOV",  "2025-01-16", 187.99, 192.72, 4.73, 2.52],
+], columns=[
+    "Ticker",
+    "Date",
+    "Price",
+    "Price from 2025-01-17",
+    "Difference",
+    "Variation"
+])
+
+"""
+df_debug["Date"] = pd.to_datetime(df_debug["Date"])
+
+calculate_other_data(df_debug)
+"""

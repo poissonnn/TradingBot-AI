@@ -30,35 +30,9 @@ def get_500_tickers():
         print("erreur")
         print(f"error : {error}")
         return [] # return an empty list to no break anything
-
-
-def choose_purchase( current_date):
+   
+def choose_ticker():
     allTickers = get_500_tickers()
     random_ticker = random.choice(allTickers)
 
-    tickerData = Request.get_ticker_stock(random_ticker)
-
-    #in week
-    if current_date.strftime("%A") not in ("Saturday", "Sunday"):
-        price = Request.get_stock_price(current_date, tickerData)
-
-
-        #unexpected closure
-        if price == None :
-            print("4")
-            print("Market close that day")
-            return None
-            
-        else:
-            Request.purchase_open_stock(current_date, tickerData)
-            
-
-    # in weekend
-    else:
-        print("Market close for weekend")
-        return None
-        
-    #price = Request.get_stock_price(current_date,tickerData)
-
-    return tickerData
-    
+    return random_ticker
