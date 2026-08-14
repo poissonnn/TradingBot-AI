@@ -31,8 +31,19 @@ def get_500_tickers():
         print(f"error : {error}")
         return [] # return an empty list to no break anything
    
-def choose_ticker():
-    allTickers = get_500_tickers()
-    random_ticker = random.choice(allTickers)
+def choose_ticker(budget,all_ticker_in_portfolio):
 
-    return random_ticker
+    print(all_ticker_in_portfolio)
+
+    if budget > 2000:
+
+        allTickers = get_500_tickers()
+        ticekr_name = random.choice(allTickers)
+
+        action = "Buy"
+
+    else:
+        action = "nothing"
+        ticekr_name = None
+
+    return action, ticekr_name

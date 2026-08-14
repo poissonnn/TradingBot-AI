@@ -134,13 +134,17 @@ def purchase_open_stock(time,tickerData):
 
 def compare_with_other_date(tickerData,stock_price ,date_to_compare):
 
-
+    i = 0
     history_price = get_stock_price(date_to_compare,tickerData)
 
     while history_price == None:
         date_to_compare = date_to_compare - timedelta(days=1)
         history_price = get_stock_price(date_to_compare,tickerData)
-        print("tkt si erreur")
+        i = i + 1
+        print(f"tkt si erreur : {i}")
+        if i > 20:
+            print("force")
+            exit()
 
     difference  = history_price - stock_price
     variation  = (history_price * 100) / stock_price-100

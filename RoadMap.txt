@@ -81,3 +81,9 @@ data frame
 
 ticker | date       | price | current    | price  | variation
 AAPL   | 2025 07 11 | 96.51 | 2026 08 11 | 164.78 | +70%
+
+
+update everything work for simple algorithme that just buy stock
+Next improvement will be to :
+give more possibility to the algorithme like selling or doing nothing
+and make the most simplest interface that only get data and that do not do any kind of calculation
