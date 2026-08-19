@@ -76,14 +76,29 @@ Simulation.py : should hold all the data like starting and ending date; inital a
 
 Algorithme.py : decide what to do and act like scratch with a lot of if fucntion
 
+transaction_df
 
-data frame
+Date       | action | ticker | price 
+2025 07 11 | buy    | AAPL   | 96.51 
 
-ticker | date       | price | current    | price  | variation
-AAPL   | 2025 07 11 | 96.51 | 2026 08 11 | 164.78 | +70%
+current_df
+
+ticker |date       | price | current    | price  | variation
+AAPL   |2025 07 11 | 96.51 | 2026 08 11 | 164.78 | +70%
+
+sell_df
+
+ticker |purchase date | price  | sell date  | price  | difference | variation
+GOOG   |2026 01 08    | 328.83 | 2026 01 13 | 334.84 | +6.00      | +1.83%
 
 
-update everything work for simple algorithme that just buy stock
-Next improvement will be to :
-give more possibility to the algorithme like selling or doing nothing
-and make the most simplest interface that only get data and that do not do any kind of calculation
+Log
+date action ticker price
+
+
+Sell 2026-01-13 GOOG 334.842443176996
+
+
+
+git restore .
+git pull

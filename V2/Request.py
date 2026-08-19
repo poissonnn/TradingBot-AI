@@ -11,6 +11,7 @@ import pytz # pour être sur la bourse américaine
 
 
 now = datetime.today()
+now_date = datetime.today().date()
 #print(now)
 yesterday = (now - timedelta(days=1)).date() # le .date() permet de garder que l'année mois et jour
 
@@ -109,27 +110,28 @@ def get_stock_price(time, tickerData, atOpeningMarket = True ):
 def get_last_available_price(tickerData, closingPrice = True ):
     if new_york_now < 16:
         price = tickerData["data"]["Close"].iloc[-2]
-        print(f"price before closure yesterday : {price}")
+        #print(f"price before closure yesterday : {price}")
     else:
         price =tickerData["data"]["Close"].iloc[-1]
-        print(f"price before closure today : {price}")
+        #print(f"price before closure today : {price}")
 
     return price
 
-def purchase_open_stock(time,tickerData):
-    #print(allOpenPrice)
+def update_purchase_history(time,tickerData,action):
     time = pd.Timestamp(time)
 
-    openPrice = tickerData["data"].loc[time,"Open"]
+    # chech the data from the dataFrame tickerData row (time) and columns (Open)
+    openPrice = tickerData["data"].at[time,"Open"]
     ticker_name = tickerData["ticker"]
 
     time = time.date()
 
-    #print(f"{time} - Purchase from {ticker_name} at {openPrice} $")
+    # debug
+    # print(f"{time} - Purchase from {ticker_name} at {openPrice} $")
 
     with open("purchaseHistory.txt", "a") as purchaseHistory:
         # openPrice is for debug because the price will be check by Scalp.get_stock_price()
-        purchaseHistory.write(f"{time} {ticker_name} {openPrice}\n") 
+        purchaseHistory.write(f"{action} {time} {ticker_name} {openPrice}\n") 
         return openPrice
 
 def compare_with_other_date(tickerData,stock_price ,date_to_compare):
@@ -159,7 +161,43 @@ def compare_with_last_price(tickerData, stock_price):
 
     return difference, variation, history_price
 
-def build_data_frame(Time_to_compare_to = True):
+def build_log_dataframe():
+    all_ticker      = []
+    all_date        = []
+    all_stock_price = []
+    all_action      = []
+
+    all_purchase = get_purchase_history(True)
+
+    for keys in all_purchase:
+        for values in all_purchase[keys]:
+
+            # take the data from purchasehistory
+            values = values.split()
+
+            # 1 - Date
+            all_date.append(values[1])
+
+            # 2 - Ticker
+            all_ticker.append(values[2])
+
+            # 3 - action
+            all_action.append(values[0])
+
+            # 4 - Price at purchase
+            history_stock_price = round(float(values[3]),2)
+            all_stock_price.append(history_stock_price)
+
+
+    columns = ["Date", "Ticker", "Action", "Price"]
+
+
+    DataFrame = pd.DataFrame(list(zip(all_date, all_ticker, all_action, all_stock_price)),
+                    columns = columns )
+
+    return DataFrame
+
+def build_current_dataframe(Time_to_compare_to = True):
     print("I belive")
 
     all_ticker              = []
@@ -173,32 +211,34 @@ def build_data_frame(Time_to_compare_to = True):
 
     for keys in all_purchase:
         for values in all_purchase[keys]:
+
             # take the data from purchasehistory
             values = values.split()
-            # 1 - Date
-            all_date.append(values[0])
+            if values[0] != "Sell":
+                # 1 - Date
+                all_date.append(values[1])
 
-            #2 - Ticker
-            ticker = values[1]
-            all_ticker.append(ticker)
+                #2 - Ticker
+                ticker = values[2]
+                all_ticker.append(ticker)
 
-            #3 - Price at purchase
-            history_stock_price = round(float(values[2]),2)
-            all_stock_price.append(history_stock_price)
+                #3 - Price at purchase
+                history_stock_price = round(float(values[3]),2)
+                all_stock_price.append(history_stock_price)
 
-            #4-5-6
-            #Difference between history and current price; the % and the current price
-            #from the data of purchaseHistory i get other info
-            tickerData = get_ticker_stock(ticker)
+                #4-5-6
+                #Difference between history and current price; the % and the current price
+                #from the data of purchaseHistory i get other info
+                tickerData = get_ticker_stock(ticker)
 
-            if Time_to_compare_to == True:
-                difference, variation, current_stock_price = compare_with_last_price(tickerData, history_stock_price)
-            else:
-                difference, variation, current_stock_price = compare_with_other_date(tickerData, history_stock_price,Time_to_compare_to)
+                if Time_to_compare_to == True:
+                    difference, variation, current_stock_price = compare_with_last_price(tickerData, history_stock_price)
+                else:
+                    difference, variation, current_stock_price = compare_with_other_date(tickerData, history_stock_price,Time_to_compare_to)
 
-            all_current_stock_price.append(round(current_stock_price, 2))
-            all_difference.append(round(difference, 2))
-            all_variation.append(round(variation, 2))
+                all_current_stock_price.append(round(current_stock_price, 2))
+                all_difference.append(round(difference, 2))
+                all_variation.append(round(variation, 2))
 
     if Time_to_compare_to == True:
         columns = ["Ticker", "Date", "Price", f"Price from {now.date()}", "Difference", "Variation"]
@@ -211,8 +251,6 @@ def build_data_frame(Time_to_compare_to = True):
     return DataFrame
 
 def calculate_other_data(dataFrame):
-    print(dataFrame)
-
     round_number = 3
 
     sum_stock_price         = round(dataFrame["Price"].sum(), round_number)
@@ -246,6 +284,14 @@ def calculate_other_data(dataFrame):
 
     return sum_stock_price, sum_current_stock_price, sum_stock_difference, variation
 
+def build_sell_dataframe():
+
+    all_purchase = get_purchase_history(True)
+
+    for keys in all_purchase:
+        for values in all_purchase[keys]:
+            print(values)
+
 
 df_debug = pd.DataFrame([
     ["TPR",  "2025-01-02", 64.22, 68.68, 4.46, 6.95],
@@ -266,6 +312,26 @@ df_debug = pd.DataFrame([
     "Difference",
     "Variation"
 ])
+
+df_transaction = build_log_dataframe()
+print(df_transaction)
+
+df_sell = build_sell_dataframe()
+print(df_sell)
+"""
+df_current = build_data_frame()
+print(df_current)
+
+sum_stock_price, sum_current_stock_price, sum_stock_difference, variation = calculate_other_data(df_current)
+
+
+print(sum_stock_price)
+print(sum_current_stock_price)
+print(sum_stock_difference)
+print(variation)"""
+
+
+
 
 """
 df_debug["Date"] = pd.to_datetime(df_debug["Date"])

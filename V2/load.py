@@ -41,7 +41,7 @@ elif choice == 2:
     print(variation)
     """
 
-    dataFrame = Request.build_data_frame(now)
+    dataFrame = Request.build_current_dataframe(now)
 
     sum_stock_price, sum_current_stock_price, sum_stock_difference, variation = Request.calculate_other_data(dataFrame)
 

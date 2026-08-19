@@ -35,15 +35,24 @@ def choose_ticker(budget,all_ticker_in_portfolio):
 
     print(all_ticker_in_portfolio)
 
-    if budget > 2000:
+    if budget < 2000:
+        try:
+            ticker_name = random.choice(all_ticker_in_portfolio)
 
+            action = "Sell"
+
+
+
+        except Exception as error:
+
+            action = "Do_Nothing"
+            ticker_name = None
+            return action,ticker_name
+
+    else:
         allTickers = get_500_tickers()
-        ticekr_name = random.choice(allTickers)
+        ticker_name = random.choice(allTickers)
 
         action = "Buy"
 
-    else:
-        action = "nothing"
-        ticekr_name = None
-
-    return action, ticekr_name
+    return action, ticker_name
